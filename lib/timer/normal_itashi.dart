@@ -37,14 +37,33 @@ class NormalItashiState extends State<NormalItashi> {
     );
   }
 
+  Widget _blackButton({
+    String title = "",
+    void Function() onPressed,
+  }) =>
+      RaisedButton(
+        onPressed: onPressed,
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            title,
+            style: TextStyle(fontSize: 25),
+          ),
+        ),
+        color: Colors.black12,
+        shape: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        ),
+      );
+
   Widget _finishButtons() {
     return Container(
       child: Row(
         mainAxisAlignment:
             _isDone ? MainAxisAlignment.center : MainAxisAlignment.spaceAround,
         children: [
-          RaisedButton(
-            child: Text(_isDone ? "もう一度" : "リセット"),
+          _blackButton(
+            title: _isDone ? "もう一度" : "リセット",
             onPressed: () {
               _time = 0;
               if (!_timer.isActive)
@@ -55,8 +74,8 @@ class NormalItashiState extends State<NormalItashi> {
           ),
           _isDone
               ? Container()
-              : RaisedButton(
-                  child: Text("致し終わった"),
+              : _blackButton(
+                  title: "致し終わった",
                   onPressed: () {
                     _timer.cancel();
                     showDialog(
