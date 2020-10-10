@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:itashta_ima/timer/record.dart';
 import 'package:share/share.dart';
 
 class NormalItashi extends StatefulWidget {
@@ -78,7 +79,9 @@ class NormalItashiState extends State<NormalItashi> {
           ),
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () async {},
+            onPressed: () async {
+              NormalItasiRecordPref.addNewRecord(_time, "comment");
+            },
           )
         ],
       ),

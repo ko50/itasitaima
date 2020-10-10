@@ -54,4 +54,16 @@ class NormalItasiRecordPref {
         records.map((record) => record.toJson()).toList();
     pref.setString("normal_itashi", json.encode(jsons));
   }
+
+  /// 追加
+  static Future addNewRecord(int time, String comment) async {
+    final NormalItasiRecord newRecord = NormalItasiRecord(
+      recordedDate: DateTime.now(),
+      milliseconds: time,
+      comment: comment,
+    );
+    final List<NormalItasiRecord> currentRecordsList =
+        await NormalItasiRecordPref.load();
+    currentRecordsList.add(newRecord);
+  }
 }
