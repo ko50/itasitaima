@@ -90,23 +90,42 @@ class NormalItashiState extends State<NormalItashi> {
     );
   }
 
+  Widget _buttonWithDescription({String description, IconButton button}) =>
+      Container(
+        child: Column(
+          children: [
+            button,
+            Text(
+              description,
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      );
+
   Widget _recordButtons() {
     return Container(
       padding: EdgeInsets.all(8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: () => Share.share(
-              "私の致し時間 ${_formatTime2()}\n"
-              "#itashita_ima",
+          _buttonWithDescription(
+            description: "シェアする",
+            button: IconButton(
+              icon: Icon(Icons.share),
+              onPressed: () => Share.share(
+                "私の致し時間 ${_formatTime2()}\n"
+                "#itashita_ima",
+              ),
             ),
           ),
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: () async {},
-          )
+          _buttonWithDescription(
+            description: "記録を保存する",
+            button: IconButton(
+              icon: Icon(Icons.save),
+              onPressed: () async {},
+            ),
+          ),
         ],
       ),
     );
