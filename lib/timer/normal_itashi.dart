@@ -20,7 +20,11 @@ class NormalItashiState extends State<NormalItashi> {
       actions: [
         FlatButton(
           child: Text("まだ続ける"),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            _timer = Timer.periodic(Duration(milliseconds: 100),
+                (timer) => setState(() => _time += 100));
+            Navigator.pop(context);
+          },
         ),
         FlatButton(
           child: Text("致せた"),
@@ -36,28 +40,32 @@ class NormalItashiState extends State<NormalItashi> {
   Widget _finishButtons() {
     return Container(
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment:
+            _isDone ? MainAxisAlignment.center : MainAxisAlignment.spaceAround,
         children: [
           RaisedButton(
-            child: Text("リセット"),
+            child: Text(_isDone ? "もう一度" : "リセット"),
             onPressed: () {
+              _time = 0;
               if (!_timer.isActive)
-                _timer = Timer.periodic(Duration(milliseconds: 1),
-                    (timer) => setState(() => _time += 1));
+                _timer = Timer.periodic(Duration(milliseconds: 100),
+                    (timer) => setState(() => _time += 100));
               setState(() => _isDone = false);
             },
           ),
-          RaisedButton(
-            child: Text("致し終わった"),
-            onPressed: () {
-              _timer.cancel();
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                child: _dialog(),
-              );
-            },
-          ),
+          _isDone
+              ? Container()
+              : RaisedButton(
+                  child: Text("致し終わった"),
+                  onPressed: () {
+                    _timer.cancel();
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      child: _dialog(),
+                    );
+                  },
+                ),
         ],
       ),
     );
@@ -88,7 +96,7 @@ class NormalItashiState extends State<NormalItashi> {
   @override
   void initState() {
     _timer = Timer.periodic(
-        Duration(milliseconds: 1), (timer) => setState(() => _time += 1));
+        Duration(milliseconds: 100), (timer) => setState(() => _time += 100));
     super.initState();
   }
 
@@ -103,13 +111,9 @@ class NormalItashiState extends State<NormalItashi> {
     h = hour < 10 ? "0$hour" : "$hour";
     m = min < 10 ? "0$min" : "$min";
     s = sec < 10 ? "0$sec" : "$sec";
-    ms = milsec < 10
-        ? "00$milsec"
-        : milsec < 100
-            ? "0$milsec"
-            : "$milsec";
+    ms = "${milsec ~/ 100}";
 
-    return "$h : $m : $s : $ms";
+    return "$h : $m : $s.$ms";
   }
 
   @override
@@ -120,17 +124,26 @@ class NormalItashiState extends State<NormalItashi> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Flexible(
-              child: Text(
-                "${_formatTime()}",
-                style: TextStyle(fontSize: 60),
-              ),
-            ),
+            _isDone
+                ? Container()
+                : Text(
+                    "経過時間",
+                    style: TextStyle(fontSize: 40),
+                  ),
+            _isDone
+                ? Container()
+                : Flexible(
+                    child: Text(
+                      "${_formatTime()}",
+                      style: TextStyle(fontSize: 60),
+                    ),
+                  ),
             _isDone
                 ? Flexible(
                     child: Text(
                       "お前の致し時間\n"
                       "${_formatTime()}",
+                      textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 50),
                     ),
                   )
