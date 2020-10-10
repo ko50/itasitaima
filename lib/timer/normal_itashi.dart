@@ -14,30 +14,80 @@ class NormalItashiState extends State<NormalItashi> {
   int _time = 0;
   bool _isDone = false;
 
+  Widget _dialog() {
+    return AlertDialog(
+      title: Text("十分に致せましたか？"),
+      actions: [
+        FlatButton(
+          child: Text("まだ続ける"),
+          onPressed: () => Navigator.pop(context),
+        ),
+        FlatButton(
+          child: Text("致せた"),
+          onPressed: () {
+            Navigator.pop(context);
+            setState(() => _isDone = true);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buttons() {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          RaisedButton(
+            child: Text("リセット"),
+            onPressed: () {
+              if (!_timer.isActive)
+                _timer = Timer.periodic(Duration(milliseconds: 1),
+                    (timer) => setState(() => _time += 1));
+              setState(() => _isDone = false);
+            },
+          ),
+          RaisedButton(
+            child: Text("致し終わった"),
+            onPressed: () {
+              _timer.cancel();
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                child: _dialog(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {
-        _time += 1;
-      });
-    });
+    _timer = Timer.periodic(
+        Duration(milliseconds: 1), (timer) => setState(() => _time += 1));
     super.initState();
   }
 
   String _formatTime() {
-    int sec, hour, min;
+    int hour = _time ~/ 3600000,
+        min = (_time - (hour * 3600000)) ~/ 60000,
+        sec = (_time - (hour * 3600000) - (min * 60000)) ~/ 1000,
+        milsec = (_time - (hour * 3600000) - (min * 60000) - (sec * 1000));
 
-    hour = _time ~/ 3600;
-    min = (_time - (hour * 3600)) ~/ 60;
-    sec = (_time - (hour * 3600) - (min * 60));
-
-    String s, h, m;
+    String h, m, s, ms;
 
     h = hour < 10 ? "0$hour" : "$hour";
     m = min < 10 ? "0$min" : "$min";
     s = sec < 10 ? "0$sec" : "$sec";
+    ms = milsec < 10
+        ? "00$milsec"
+        : milsec < 100
+            ? "0$milsec"
+            : "$milsec";
 
-    return "$h : $m : $s";
+    return "$h : $m : $s : $ms";
   }
 
   @override
@@ -57,71 +107,26 @@ class NormalItashiState extends State<NormalItashi> {
             _isDone
                 ? Flexible(
                     child: Column(
-                      children: [Text(
-                      "お前の致し時間\n ${_formatTime()}",
-                      style: TextStyle(fontSize: 50),
-                    ),
-                      IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                      Share.share(
-                        "私の致し時間\n ${_formatTime()}"
-                        "#itashitaima"
-                      );
-                      },)
-                      ]
-                  ))
-                : Container(),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  RaisedButton(
-                    child: Text("リセット"),
-                    onPressed: () {
-                      if (!_timer.isActive)
-                        _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-                          setState(() {
-                            _time += 1;
-                          });
-                        });
-                      setState(() {
-                        _isDone = false;
-                      });
-                    },
-                  ),
-                  RaisedButton(
-                    child: Text("致し終わった"),
-                    onPressed: () {
-                      _timer.cancel();
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        child: AlertDialog(
-                          title: Text("十分に致せましたか？"),
-                          content: Text("まだ続けるというのなら続けてどうぞ"),
-                          actions: [
-                            FlatButton(
-                              child: Text("続ける"),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            FlatButton(
-                              child: Text("終了"),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                setState(() {
-                                  _isDone = true;
-                                });
-                              },
-                            ),
-                          ],
+                      children: [
+                        Text(
+                          "お前の致し時間\n"
+                          "${_formatTime()}",
+                          style: TextStyle(fontSize: 50),
                         ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
+                        IconButton(
+                          icon: Icon(Icons.share),
+                          onPressed: () {
+                            Share.share(
+                              "私の致し時間 ${_formatTime()}\n"
+                              "#itashitaima",
+                            );
+                          },
+                        )
+                      ],
+                    ),
+                  )
+                : Container(),
+            _buttons(),
           ],
         ),
       ),
