@@ -33,7 +33,7 @@ class NormalItashiState extends State<NormalItashi> {
     );
   }
 
-  Widget _buttons() {
+  Widget _finishButtons() {
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -58,6 +58,28 @@ class NormalItashiState extends State<NormalItashi> {
               );
             },
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _recordButtons() {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: () => Share.share(
+              "私の致し時間 ${_formatTime()}\n"
+              "#itashita_ima",
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: () async {},
+          )
         ],
       ),
     );
@@ -106,27 +128,15 @@ class NormalItashiState extends State<NormalItashi> {
             ),
             _isDone
                 ? Flexible(
-                    child: Column(
-                      children: [
-                        Text(
-                          "お前の致し時間\n"
-                          "${_formatTime()}",
-                          style: TextStyle(fontSize: 50),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.share),
-                          onPressed: () {
-                            Share.share(
-                              "私の致し時間 ${_formatTime()}\n"
-                              "#itashitaima",
-                            );
-                          },
-                        )
-                      ],
+                    child: Text(
+                      "お前の致し時間\n"
+                      "${_formatTime()}",
+                      style: TextStyle(fontSize: 50),
                     ),
                   )
                 : Container(),
-            _buttons(),
+            _isDone ? _recordButtons() : Container(),
+            _finishButtons(),
           ],
         ),
       ),
