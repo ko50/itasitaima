@@ -27,7 +27,7 @@ class NormalItashiState extends State<NormalItashi> {
           },
         ),
         FlatButton(
-          child: Text("致せた"),
+          child: Text("致した"),
           onPressed: () {
             Navigator.pop(context);
             setState(() => _isDone = true);
@@ -99,7 +99,7 @@ class NormalItashiState extends State<NormalItashi> {
           IconButton(
             icon: Icon(Icons.share),
             onPressed: () => Share.share(
-              "私の致し時間 ${_formatTime()}\n"
+              "私の致し時間 ${_formatTime2()}\n"
               "#itashita_ima",
             ),
           ),
@@ -119,20 +119,36 @@ class NormalItashiState extends State<NormalItashi> {
     super.initState();
   }
 
-  String _formatTime() {
+  DateTime _parseTime() {
     int hour = _time ~/ 3600000,
         min = (_time - (hour * 3600000)) ~/ 60000,
         sec = (_time - (hour * 3600000) - (min * 60000)) ~/ 1000,
         milsec = (_time - (hour * 3600000) - (min * 60000) - (sec * 1000));
 
-    String h, m, s, ms;
+    return DateTime(2020, 10, 10, hour, min, sec, milsec);
+  }
 
-    h = hour < 10 ? "0$hour" : "$hour";
-    m = min < 10 ? "0$min" : "$min";
-    s = sec < 10 ? "0$sec" : "$sec";
-    ms = "${milsec ~/ 100}";
+  String _formatTime() {
+    DateTime t = _parseTime();
+    int hour = t.hour, min = t.minute, sec = t.second, milsec = t.millisecond;
 
+    String h = hour < 10 ? "0$hour" : "$hour",
+        m = min < 10 ? "0$min" : "$min",
+        s = sec < 10 ? "0$sec" : "$sec",
+        ms = "${milsec ~/ 100}";
     return "$h : $m : $s.$ms";
+  }
+
+  String _formatTime2() {
+    DateTime t = _parseTime();
+    int hour = t.hour, min = t.minute, sec = t.second, milsec = t.millisecond;
+
+    String h = hour == 0 ? "" : "$hour時間",
+        m = min == 0 ? "" : "$min分",
+        s = sec == 0 ? "" : "$sec",
+        ms = "${milsec ~/ 100}秒";
+
+    return "$h$m$s.$ms";
   }
 
   @override
@@ -161,7 +177,7 @@ class NormalItashiState extends State<NormalItashi> {
                 ? Flexible(
                     child: Text(
                       "お前の致し時間\n"
-                      "${_formatTime()}",
+                      "${_formatTime2()}",
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 50),
                     ),
