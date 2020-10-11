@@ -20,10 +20,14 @@ class NormalItashiState extends State<NormalItashi> {
       actions: [
         FlatButton(
           child: Text("まだ続ける"),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            _timer = Timer.periodic(Duration(milliseconds: 100),
+                (timer) => setState(() => _time += 100));
+            Navigator.pop(context);
+          },
         ),
         FlatButton(
-          child: Text("致せた"),
+          child: Text("致した"),
           onPressed: () {
             Navigator.pop(context);
             setState(() => _isDone = true);
@@ -33,30 +37,94 @@ class NormalItashiState extends State<NormalItashi> {
     );
   }
 
-  Widget _buttons() {
+  Widget _blackButton({
+    String title = "",
+    void Function() onPressed,
+  }) =>
+      RaisedButton(
+        onPressed: onPressed,
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            title,
+            style: TextStyle(fontSize: 25),
+          ),
+        ),
+        color: Colors.black12,
+        shape: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        ),
+      );
+
+  Widget _finishButtons() {
     return Container(
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment:
+            _isDone ? MainAxisAlignment.center : MainAxisAlignment.spaceAround,
         children: [
-          RaisedButton(
-            child: Text("リセット"),
+          _blackButton(
+            title: _isDone ? "もう一度" : "リセット",
             onPressed: () {
+              _time = 0;
               if (!_timer.isActive)
-                _timer = Timer.periodic(Duration(milliseconds: 1),
-                    (timer) => setState(() => _time += 1));
+                _timer = Timer.periodic(Duration(milliseconds: 100),
+                    (timer) => setState(() => _time += 100));
               setState(() => _isDone = false);
             },
           ),
-          RaisedButton(
-            child: Text("致し終わった"),
-            onPressed: () {
-              _timer.cancel();
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                child: _dialog(),
-              );
-            },
+          _isDone
+              ? Container()
+              : _blackButton(
+                  title: "致し終わった",
+                  onPressed: () {
+                    _timer.cancel();
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      child: _dialog(),
+                    );
+                  },
+                ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buttonWithDescription({String description, IconButton button}) =>
+      Container(
+        child: Column(
+          children: [
+            button,
+            Text(
+              description,
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      );
+
+  Widget _recordButtons() {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buttonWithDescription(
+            description: "シェアする",
+            button: IconButton(
+              icon: Icon(Icons.share),
+              onPressed: () => Share.share(
+                "私の致し時間 ${_formatTime2()}\n"
+                "#itashita_ima",
+              ),
+            ),
+          ),
+          _buttonWithDescription(
+            description: "記録を保存する",
+            button: IconButton(
+              icon: Icon(Icons.save),
+              onPressed: () async {},
+            ),
           ),
         ],
       ),
@@ -66,28 +134,40 @@ class NormalItashiState extends State<NormalItashi> {
   @override
   void initState() {
     _timer = Timer.periodic(
-        Duration(milliseconds: 1), (timer) => setState(() => _time += 1));
+        Duration(milliseconds: 100), (timer) => setState(() => _time += 100));
     super.initState();
   }
 
-  String _formatTime() {
+  DateTime _parseTime() {
     int hour = _time ~/ 3600000,
         min = (_time - (hour * 3600000)) ~/ 60000,
         sec = (_time - (hour * 3600000) - (min * 60000)) ~/ 1000,
         milsec = (_time - (hour * 3600000) - (min * 60000) - (sec * 1000));
 
-    String h, m, s, ms;
+    return DateTime(2020, 10, 10, hour, min, sec, milsec);
+  }
 
-    h = hour < 10 ? "0$hour" : "$hour";
-    m = min < 10 ? "0$min" : "$min";
-    s = sec < 10 ? "0$sec" : "$sec";
-    ms = milsec < 10
-        ? "00$milsec"
-        : milsec < 100
-            ? "0$milsec"
-            : "$milsec";
+  String _formatTime() {
+    DateTime t = _parseTime();
+    int hour = t.hour, min = t.minute, sec = t.second, milsec = t.millisecond;
 
-    return "$h : $m : $s : $ms";
+    String h = hour < 10 ? "0$hour" : "$hour",
+        m = min < 10 ? "0$min" : "$min",
+        s = sec < 10 ? "0$sec" : "$sec",
+        ms = "${milsec ~/ 100}";
+    return "$h : $m : $s.$ms";
+  }
+
+  String _formatTime2() {
+    DateTime t = _parseTime();
+    int hour = t.hour, min = t.minute, sec = t.second, milsec = t.millisecond;
+
+    String h = hour == 0 ? "" : "$hour時間",
+        m = min == 0 ? "" : "$min分",
+        s = sec == 0 ? "" : "$sec",
+        ms = "${milsec ~/ 100}秒";
+
+    return "$h$m$s.$ms";
   }
 
   @override
@@ -98,35 +178,32 @@ class NormalItashiState extends State<NormalItashi> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Flexible(
-              child: Text(
-                "${_formatTime()}",
-                style: TextStyle(fontSize: 60),
-              ),
-            ),
+            _isDone
+                ? Container()
+                : Text(
+                    "経過時間",
+                    style: TextStyle(fontSize: 40),
+                  ),
+            _isDone
+                ? Container()
+                : Flexible(
+                    child: Text(
+                      "${_formatTime()}",
+                      style: TextStyle(fontSize: 60),
+                    ),
+                  ),
             _isDone
                 ? Flexible(
-                    child: Column(
-                      children: [
-                        Text(
-                          "お前の致し時間\n"
-                          "${_formatTime()}",
-                          style: TextStyle(fontSize: 50),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.share),
-                          onPressed: () {
-                            Share.share(
-                              "私の致し時間 ${_formatTime()}\n"
-                              "#itashitaima",
-                            );
-                          },
-                        )
-                      ],
+                    child: Text(
+                      "お前の致し時間\n"
+                      "${_formatTime2()}",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 50),
                     ),
                   )
                 : Container(),
-            _buttons(),
+            _isDone ? _recordButtons() : Container(),
+            _finishButtons(),
           ],
         ),
       ),
