@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class SaveDialog extends StatelessWidget {
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
   final TextEditingController _controller = TextEditingController();
-  final TextStyle _textStyle = TextStyle(fontSize: 25);
 
   static Future<String> show(BuildContext context) {
     return showDialog(

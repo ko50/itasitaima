@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:itashta_ima/common_widgets/save_dialog.dart';
 import 'package:itashta_ima/timer/record.dart';
 import 'package:share/share.dart';
 
@@ -125,7 +126,9 @@ class NormalItashiState extends State<NormalItashi> {
             button: IconButton(
               icon: Icon(Icons.save),
               onPressed: () async {
-                NormalItasiRecordPref.addNewRecord(_time, "comment");
+                final String comment = await SaveDialog.show(context);
+                if (comment != null)
+                  NormalItasiRecordPref.addNewRecord(_time, comment);
               },
             ),
           ),
